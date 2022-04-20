@@ -142,15 +142,10 @@ sample({
 const useQuestions = () => useStore($questions)
 const useDoneQuestions = () => useStore($doneQuestions)
 const useUnDoneQuestions = () => useStore($undoneQuestions)
-
 const useSelectedQuestion = () => useStore($selectedQestion)
-
 const useAnswer = () => useStore($answer)
-
 const useIsDone = () => useStore($isDone)
-
 const useWrongAnswer = () => useStore($wrongAnswer)
-
 const useHistoryList = () => useStore($historyList)
 
 export const selectors = {

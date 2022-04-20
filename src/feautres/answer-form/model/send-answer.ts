@@ -34,7 +34,15 @@ sample({
 })
 
 reset({ clock: changeField, target: questionsModel.$wrongAnswer })
-reset({ clock: questionsModel.$currentLetter, target: $field })
+reset({
+    clock: [
+        questionsModel.$currentLetter,
+        questionsModel.$selectedQestion,
+        questionsModel.$isDone,
+        $fullField,
+    ],
+    target: $field,
+})
 reset({
     clock: [questionsModel.$wrongAnswer, questionsModel.$isDone],
     target: $fullField,
