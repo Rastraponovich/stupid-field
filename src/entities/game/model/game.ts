@@ -27,6 +27,8 @@ sample({
     target: questionsModel.events.clearHistory,
 })
 
+reset({ clock: startGame, target: questionsModel.$isDone })
+
 export const events = {
     startGame,
 }
