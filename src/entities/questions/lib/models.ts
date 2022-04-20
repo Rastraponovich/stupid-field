@@ -4,3 +4,12 @@ export type TQuestion = {
     answer: string
     complite?: boolean
 }
+
+export type TAnswer = {
+    id: number
+    text: string
+    answered: boolean
+}
+export interface IHistoryAnswer extends TAnswer {
+    time: string
+}

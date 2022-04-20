@@ -1,3 +1,4 @@
+import { WinnerWindow } from "@/src/feautres/show-winner"
 import { ReactNode } from "react"
 import { Footer } from ".."
 import { Header } from ".."
@@ -11,6 +12,8 @@ export const Layout = ({ children }: LayoutProps) => {
         <>
             <Header />
             {children}
+
+            <WinnerWindow />
             <Footer />
         </>
     )

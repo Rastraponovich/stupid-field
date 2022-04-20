@@ -1,63 +1,46 @@
 import type { GetServerSideProps, NextPage } from "next"
 import { allSettled, fork, serialize } from "effector"
-import { useEvent, useStore, useStoreMap } from "effector-react/scope"
-import { questionsModel } from "@/src/entities/questions"
-import clsx from "clsx"
+import { ErrorText, questionsModel } from "@/src/entities/questions"
+import { AnswerField } from "@/src/entities/questions/ui/answer-field"
+import { AnswerForm } from "@/src/feautres/answer-form"
+import { HistoryAnswersList } from "@/src/entities/questions/ui/history-list"
+import { useRouter } from "next/router"
+import { gameModel } from "@/src/entities/game"
+import { useEffect } from "react"
 
 const Question: NextPage = () => {
     const question = questionsModel.selectors.useSelectedQuestion()
 
-    const handleChange = useEvent(questionsModel.events.setAnswerField)
-    const onSubmit = useEvent(questionsModel.events.submit)
-    const value = questionsModel.selectors.useAnswerField()
-    const isDone = questionsModel.selectors.useIsDone()
+    const router = useRouter()
 
-    const answer = questionsModel.selectors.useAnswer()
-    console.log(answer)
+    const gameState = gameModel.selectors.useGameState()
+
+    useEffect(() => {
+        if (gameState === "ended") router.replace("/")
+    }, [gameState])
 
     return (
-        <main className="px-10 py-4 flex flex-col grow">
-            <h2 className="prose">Welcome to Stupid Field</h2>
-            <section className="flex flex-col grow">
-                <p>{question.text}</p>
+        <main className="px-10 py-4 flex flex-col grow bg-gray-100">
+            <div className="grid grid-cols-4 grow gap-8">
+                <section className="col-span-3 flex flex-col space-y-4">
+                    <article className="flex flex-col prose ">
+                        <h2 className="first-letter:uppercase">вопрос</h2>
+                        <p className="p-2 bg-gray-200 rounded">
+                            {question.text}
+                        </p>
+                    </article>
 
-                <h1>Answer</h1>
-                <div className="flex justify-center space-x-2 rounded-sm bg-gray-400 py-2">
-                    {answer.map((item, idx) => (
-                        <span
-                            className={clsx(
-                                "border-white bg-blue-600 text-white rounded-sm p-2 border-2 h-12 w-10 text-center"
-                            )}
-                            key={idx}
-                        >
-                            {item.text}
-                        </span>
-                    ))}
-                </div>
-                <form
-                    onSubmit={onSubmit}
-                    className="flex flex-col space-y-2 items-start"
-                >
-                    <label className="flex flex-col">
-                        <span>Введите ответ</span>
-                        <input
-                            type="text"
-                            className="px-2 py-1 border text-sm"
-                            onChange={handleChange}
-                            value={value}
-                            disabled={isDone}
-                        />
-                    </label>
-                    <button
-                        type="submit"
-                        className="px-2 py-1 bg-green-600 text-white text-center text-sm rounded"
-                    >
-                        send
-                    </button>
-                </form>
-            </section>
+                    <AnswerField />
+                    <ErrorText />
+                    <div className="self-center">
+                        <AnswerForm />
+                    </div>
+                </section>
 
-            <section className="flex"></section>
+                <aside className="flex col-span-1 col-end-5 w-full">
+                    <HistoryAnswersList />
+                </aside>
+            </div>
         </main>
     )
 }

@@ -1,14 +1,15 @@
 import type { NextPage } from "next"
 import { fork, serialize } from "effector"
-import { useEvent, useStore, useStoreMap } from "effector-react/scope"
-import { QuestionList } from "../entities/questions"
+import { gameModel } from "../entities/game"
+import { StartGameButton } from "../feautres/start-game/ui"
 
 const MainPage: NextPage = () => {
+    const gameState = gameModel.selectors.useGameState()
+
     return (
         <main className="px-10 py-4 flex flex-col grow">
-            <h2 className="prose">Welcome to Stupid Field</h2>
-            <section className="flex flex-col grow">
-                <QuestionList />
+            <section className="flex flex-col items-center justify-center grow">
+                <StartGameButton />
             </section>
         </main>
     )

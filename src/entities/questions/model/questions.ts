@@ -1,7 +1,7 @@
+import dayjs from "dayjs"
 import { combine, createEvent, createStore, sample } from "effector"
 import { useStore } from "effector-react"
-import { ChangeEvent } from "react"
-import { TQuestion, __questions__ } from "../lib"
+import { IHistoryAnswer, TAnswer, TQuestion, __questions__ } from "../lib"
 
 const $questions = createStore<TQuestion[]>(__questions__)
 
@@ -14,7 +14,9 @@ const $undoneQuestions = $questions.map((item) =>
 
 const selectQuestion = createEvent<number>()
 
-const $selectedQestion = createStore<TQuestion>({ answer: "" } as TQuestion)
+export const $selectedQestion = createStore<TQuestion>({
+    answer: "",
+} as TQuestion)
 
 sample({
     clock: selectQuestion,
@@ -25,43 +27,50 @@ sample({
     target: $selectedQestion,
 })
 
-type TAnswer = {
-    id: number
-    text: string
-    answered: boolean
-}
-
 const $answerArray = createStore<TAnswer[]>([]).on($selectedQestion, (_, q) =>
     q.answer
         .split("")
         .map((item, idx) => ({ id: ++idx, text: item, answered: false }))
 )
 
-const submit = createEvent<ChangeEvent<HTMLFormElement>>()
+const checkAnswerLetter = createEvent<string>()
+const checkAnswerWord = createEvent<string>()
 
-submit.watch((e) => e.preventDefault())
-
-const setAnswerField = createEvent<ChangeEvent<HTMLInputElement>>()
-const $answerField = createStore<string>("").on(
-    setAnswerField,
-    (state, event) => event.target.value
+export const $currentLetter = createStore<string>("").on(
+    checkAnswerLetter,
+    (_, letter) => letter
 )
 
-const checkAnswer = createEvent<string>()
-
-sample({
-    clock: submit,
-    source: $answerField,
-    target: checkAnswer,
+export const $wrongAnswer = createStore<Record<string, any>>({
+    error: false,
+    letter: "",
 })
 
 sample({
-    clock: checkAnswer,
+    clock: checkAnswerLetter,
     source: $answerArray,
-    fn: (answerArray, answer) =>
+    filter: (answers, letter) =>
+        answers.every(
+            (item) => item.text.toLowerCase() !== letter.toLowerCase()
+        ),
+
+    fn: (answerArray, letter) => ({ error: true, letter }),
+
+    target: $wrongAnswer,
+})
+
+sample({
+    clock: checkAnswerLetter,
+    source: $answerArray,
+    filter: (answers, letter) =>
+        answers.some(
+            (item) => item.text.toLowerCase() === letter.toLowerCase()
+        ),
+
+    fn: (answerArray, letter) =>
         answerArray.map((item) => {
-            const condition = item.text === answer
-            if (condition) return { ...item, text: answer, answered: true }
+            const condition = item.text.toLowerCase() === letter.toLowerCase()
+            if (condition) return { ...item, text: letter, answered: true }
             return item
         }) as TAnswer[],
     target: $answerArray,
@@ -71,10 +80,10 @@ const $answer = combine($answerArray, (question) => {
     return question.map((item, id) => ({
         id,
         text: item.answered ? item.text : "",
-    }))
+    })) as TAnswer[]
 })
 
-const $isDone = createStore<boolean>(false).reset($selectedQestion)
+export const $isDone = createStore<boolean>(false).reset($selectedQestion)
 
 sample({
     clock: $answerArray,
@@ -84,8 +93,51 @@ sample({
 
     target: $isDone,
 })
+const clearHistory = createEvent()
+const $historyList = createStore<IHistoryAnswer[]>([]).reset(clearHistory)
 
-$answerField.reset($answer)
+sample({
+    clock: checkAnswerLetter,
+    source: [$answerArray, $historyList],
+    fn: ([letters, history], letter) => {
+        const condition = letters.some((item) => item.text === letter)
+        return [
+            ...history,
+            {
+                id: +history.length,
+                text: letter,
+                time: dayjs().format(),
+                answered: condition,
+            },
+        ] as IHistoryAnswer[]
+    },
+    target: $historyList,
+})
+
+sample({
+    clock: checkAnswerWord,
+    source: $answerArray,
+    filter: (array, word) =>
+        array
+            .map((a) => a.text)
+            .join("")
+            .toLowerCase() === word.toLowerCase(),
+    fn: (array, _) => array.map((item) => ({ ...item, answered: true })),
+
+    target: $answerArray,
+})
+
+sample({
+    clock: checkAnswerWord,
+    source: $answerArray,
+    filter: (array, word) =>
+        array
+            .map((a) => a.text)
+            .join("")
+            .toLowerCase() !== word.toLowerCase(),
+    fn: () => ({ error: true, text: "" }),
+    target: $wrongAnswer,
+})
 
 const useQuestions = () => useStore($questions)
 const useDoneQuestions = () => useStore($doneQuestions)
@@ -95,9 +147,11 @@ const useSelectedQuestion = () => useStore($selectedQestion)
 
 const useAnswer = () => useStore($answer)
 
-const useAnswerField = () => useStore($answerField)
-
 const useIsDone = () => useStore($isDone)
+
+const useWrongAnswer = () => useStore($wrongAnswer)
+
+const useHistoryList = () => useStore($historyList)
 
 export const selectors = {
     useQuestions,
@@ -106,11 +160,13 @@ export const selectors = {
     useSelectedQuestion,
     useAnswer,
     useIsDone,
-    useAnswerField,
+    useWrongAnswer,
+    useHistoryList,
 }
 
 export const events = {
     selectQuestion,
-    setAnswerField,
-    submit,
+    clearHistory,
+    checkAnswerLetter,
+    checkAnswerWord,
 }
