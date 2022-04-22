@@ -1,12 +1,15 @@
 import { questionsModel } from "@/src/entities/questions"
 import { createEvent, createStore, sample } from "effector"
 import { useStore } from "effector-react"
+import { debug } from "patronum"
 
 const toggleShowWindow = createEvent()
-const $showWindow = createStore<boolean>(false)
-    .on(toggleShowWindow, (state, _) => !state)
-    .on(questionsModel.$isDone, () => true)
+export const $showWindow = createStore<boolean>(false).on(
+    toggleShowWindow,
+    (state, _) => !state
+)
 
+debug($showWindow, questionsModel.$isDone)
 const $answer = createStore<string>("")
 
 sample({

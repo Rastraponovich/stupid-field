@@ -5,7 +5,7 @@ import { TAnswer } from "../../lib"
 export const AnswerField = () => {
     const answer = questionsModel.selectors.useAnswer()
     return (
-        <div className="flex justify-center space-x-2 rounded-sm bg-gray-400 py-2 self-center px-10">
+        <div className="flex justify-center space-x-2  bg-transparent py-2 self-center px-10">
             {answer.map((item, idx) => (
                 <AnswerLetter answerLetter={item} key={idx} />
             ))}

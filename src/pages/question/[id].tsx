@@ -15,9 +15,9 @@ const Question: NextPage = () => {
 
     const gameState = gameModel.selectors.useGameState()
 
-    useEffect(() => {
-        if (gameState === "ended") router.replace("/")
-    }, [gameState])
+    // useEffect(() => {
+    //     if (gameState === "ended") router.replace("/")
+    // }, [gameState])
 
     return (
         <main className="px-10 py-4 flex flex-col grow bg-gray-100">
@@ -29,8 +29,9 @@ const Question: NextPage = () => {
                             {question.text}
                         </p>
                     </article>
-
-                    <AnswerField />
+                    <div className="flex justify-center rounded-sm bg-gray-400 self-center p">
+                        <AnswerField />
+                    </div>
                     <ErrorText />
                     <div className="self-center">
                         <AnswerForm />
