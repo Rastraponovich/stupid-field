@@ -1,9 +1,33 @@
 import dayjs from "dayjs"
-import { combine, createEvent, createStore, sample } from "effector"
+import {
+    combine,
+    createEffect,
+    createEvent,
+    createStore,
+    sample,
+} from "effector"
 import { useStore } from "effector-react"
+import { debug, reset } from "patronum"
 import { IHistoryAnswer, TAnswer, TQuestion, __questions__ } from "../lib"
+import { getAllQuestionsFx, getRandomQuestionFx } from "./api"
 
-const $questions = createStore<TQuestion[]>(__questions__)
+const getAllQuestions = createEvent()
+
+sample({
+    clock: getAllQuestions,
+    target: getAllQuestionsFx,
+})
+const $questions = createStore<TQuestion[]>(__questions__).on(
+    getAllQuestionsFx.doneData,
+    (_, res) => res.data[0]
+)
+
+const $questionsCount = createStore(0).on(
+    getAllQuestionsFx.doneData,
+    (_, res) => res.data[1]
+)
+
+reset({ clock: getAllQuestions, target: [$questionsCount, $questions] })
 
 const $doneQuestions = $questions.map((item) =>
     item.filter((q) => q.complite).map((q1) => q1.id)
@@ -12,20 +36,16 @@ const $undoneQuestions = $questions.map((item) =>
     item.filter((q) => !q.complite).map((q1) => q1.id)
 )
 
-const selectQuestion = createEvent<number>()
+const getRandomQuestion = createEvent()
+
+sample({
+    clock: getRandomQuestion,
+    target: getRandomQuestionFx,
+})
 
 export const $selectedQestion = createStore<TQuestion>({
     answer: "",
-} as TQuestion)
-
-sample({
-    clock: selectQuestion,
-    source: $questions,
-    filter: (questions, id) => questions.some((item) => item.id === id),
-    fn: (questions, id) =>
-        questions.find((item) => item.id === id) as TQuestion,
-    target: $selectedQestion,
-})
+} as TQuestion).on(getRandomQuestionFx.doneData, (_, res) => res.data)
 
 const $answerArray = createStore<TAnswer[]>([]).on($selectedQestion, (_, q) =>
     q.answer
@@ -83,7 +103,12 @@ const $answer = combine($answerArray, (question) => {
     })) as TAnswer[]
 })
 
-export const $isDone = createStore<boolean>(false).reset($selectedQestion)
+export const $isDone = createStore<boolean>(false)
+
+reset({
+    clock: getRandomQuestion,
+    target: [$isDone, $selectedQestion, $answerArray],
+})
 
 sample({
     clock: $answerArray,
@@ -93,6 +118,7 @@ sample({
 
     target: $isDone,
 })
+
 const clearHistory = createEvent()
 const $historyList = createStore<IHistoryAnswer[]>([]).reset(clearHistory)
 
@@ -160,8 +186,8 @@ export const selectors = {
 }
 
 export const events = {
-    selectQuestion,
     clearHistory,
     checkAnswerLetter,
+    getRandomQuestion,
     checkAnswerWord,
 }

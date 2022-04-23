@@ -1,8 +1,12 @@
-import Toggle from "@/src/shared/ui/toggle"
+import { Toggle } from "@/src/shared/ui/toggle"
 import { useEvent } from "effector-react/scope"
+import { useEffect } from "react"
 import { sendAnswerModel } from ".."
 
 export const ToggleFiledFormat = () => {
+    useEffect(() => {
+        return () => console.log("unmount, toggleFiled")
+    }, [])
     const fullField = sendAnswerModel.selectors.useFullField()
     const handleToggle = useEvent(sendAnswerModel.events.toggleFullField)
 

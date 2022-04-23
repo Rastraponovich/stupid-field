@@ -20,7 +20,7 @@ const startTimerFx = createEffect(() => {
 })
 const startTimer = createEvent()
 const stopTimer = createEvent()
-export const $timer = createStore<number>(10).reset(startTimer)
+export const $timer = createStore<number>(10).reset(startTimer).reset(stopTimer)
 
 const $timerId = createStore<any>(null).on(startTimer, (id, _) => {
     clearInterval(id)
@@ -28,8 +28,13 @@ const $timerId = createStore<any>(null).on(startTimer, (id, _) => {
 })
 
 sample({
-    clock: startTimer,
+    clock: stopTimer,
+    source: $timerId,
+    fn: clearInterval,
+})
 
+sample({
+    clock: startTimer,
     target: startTimerFx,
 })
 
@@ -44,17 +49,18 @@ sample({
 })
 
 $timerId.on(startTimerFx.doneData, (_, timerId) => timerId)
+const startGame = createEvent()
 
 sample({
     clock: $timer,
     source: $timerId,
-    filter: (_, time) => time <= 0.01,
+    filter: (_, time) => time <= 0,
     fn: (id, _) => clearInterval(id),
+    target: startGame,
 })
 
 debug($timerId)
 
-const startGame = createEvent()
 const $gameState = createStore<gameLib.TGameState>("stopped").on(
     startGame,
     () => "started"
@@ -88,6 +94,7 @@ reset({
 export const events = {
     startGame,
     startTimer,
+    stopTimer,
 }
 
 const useGameState = () => useStore($gameState)

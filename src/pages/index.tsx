@@ -19,7 +19,7 @@ const MainPage: NextPage = () => {
 export default MainPage
 
 export const getServerSideProps = async () => {
-    const scope = fork()
+    const scope = fork({ [gameModel.$timer.sid!]: 10 })
     const initialState = serialize(scope)
 
     return {

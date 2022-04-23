@@ -1,5 +1,4 @@
 import { questionsModel } from "@/src/entities/questions"
-import Toggle from "@/src/shared/ui/toggle"
 import clsx from "clsx"
 import { useEvent } from "effector-react"
 import { sendAnswerModel } from ".."

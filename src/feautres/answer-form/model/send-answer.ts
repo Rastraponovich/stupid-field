@@ -16,7 +16,7 @@ const $fullField = createStore<boolean>(false).on(
     toggleFullField,
     (state, _) => !state
 )
-
+debug(toggleFullField, $fullField)
 sample({
     clock: sendAnswer,
     source: [$field, $fullField],
@@ -39,12 +39,13 @@ reset({
         questionsModel.$currentLetter,
         questionsModel.$selectedQestion,
         questionsModel.$isDone,
+        questionsModel.$wrongAnswer,
         $fullField,
     ],
     target: $field,
 })
 reset({
-    clock: [questionsModel.$wrongAnswer, questionsModel.$isDone],
+    clock: [questionsModel.$isDone],
     target: $fullField,
 })
 

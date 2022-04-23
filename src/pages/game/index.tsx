@@ -5,7 +5,7 @@ import { AnswerField } from "@/src/entities/questions/ui/answer-field"
 import { AnswerForm } from "@/src/feautres/answer-form"
 import { HistoryAnswersList } from "@/src/entities/questions/ui/history-list"
 
-const Question: NextPage = () => {
+const Game: NextPage = () => {
     const question = questionsModel.selectors.useSelectedQuestion()
 
     return (
@@ -35,15 +35,11 @@ const Question: NextPage = () => {
     )
 }
 
-export default Question
+export default Game
 
 export const getServerSideProps: GetServerSideProps = async ({ params }) => {
     const scope = fork()
 
-    // await allSettled(questionsModel.events.selectQuestion, {
-    //     scope,
-    //     params: Number(params!.id),
-    // })
     await allSettled(questionsModel.events.getRandomQuestion, { scope })
     const initialState = serialize(scope)
 

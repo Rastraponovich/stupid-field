@@ -1,11 +1,14 @@
-import { memo } from "react"
+import { memo, useEffect } from "react"
 import { Switch } from "@headlessui/react"
 
 interface ToggleProps {
     enabled: boolean
     onChange(): void
 }
-const Toggle = ({ enabled, onChange }: ToggleProps) => {
+export const Toggle = memo(({ enabled, onChange }: ToggleProps) => {
+    useEffect(() => {
+        return () => console.log("unmount, toggle")
+    }, [])
     return (
         <Switch
             as="div"
@@ -22,6 +25,6 @@ const Toggle = ({ enabled, onChange }: ToggleProps) => {
             />
         </Switch>
     )
-}
+})
 
-export default memo(Toggle)
+Toggle.displayName = "Toggle"

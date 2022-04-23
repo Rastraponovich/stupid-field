@@ -9,7 +9,6 @@ export const $showWindow = createStore<boolean>(false).on(
     (state, _) => !state
 )
 
-debug($showWindow, questionsModel.$isDone)
 const $answer = createStore<string>("")
 
 sample({
